@@ -1,6 +1,6 @@
 # latex-helper
 
-A Clojure library designed to ... well, that part is up to you.
+A Clojure library designed to help out with various tasks associated with writing latex documents.
 
 ## Usage
 
