@@ -34,35 +34,49 @@
   :pass)
 
 
+(defn ^:private multi-replace
+  "Given a seq of [match replacement] pairs applies all replacements in order
+  to the given string"
+  [s match-replacement-pairs]
+  (reduce (fn [s1 [match replacement]]
+            (str/replace s1 match replacement))
+          s match-replacement-pairs))
+
+(comment
+  (multi-replace "foo bar baz zod" [["bar" "BAR"]
+                                    ["baz" "BAZ"]]))
+
 (defn ^:private curly-quotes->dumb-quotes
   "Take curly quotes like ‘ ’  “ ” and replace them with their
   straight quotes equivalents"
   [s]
-  (-> s
-    (str/replace "‘" "'")
-    (str/replace "’" "'")
-    (str/replace "“" "\"")
-    (str/replace "”" "\"")))
+  (multi-replace s [["‘" "'"]
+                    ["’" "'"]
+                    ["“" "\""]
+                    ["”" "\""]]))
 
 (comment
-  (curly-quotes->dumb-quotes "a ‘big’ “bright” day")) ; => "a 'big' \"bright\" day"
+  (println (curly-quotes->dumb-quotes "a ‘big’ “bright” day"))) ; a 'big' "bright" day
+
 
 (defn ^:private dumb-quotes->smart-html-quotes
   "Convert dumb quotes in a string to smart html quotes.
   Based on https://gist.github.com/davidtheclark/5521432"
   [s]
-  (-> s
-      ; Find dumb double quotes coming directly after letters or punctuation,
-      ; and replace them with right double quotes.
-      (str/replace ,,, #"([a-zA-Z0-9.,?!;:\"\'])\"" "$1&#8221;")
-      ; Find any remaining dumb double quotes and replace them with
-      ; left double quotes.
-      (str/replace ,,, #"\"" "&#8220;")
-      ; # Follow the same process with dumb/smart single quotes
-      (str/replace ,,, #"([a-zA-Z0-9.,?!;:\"\'])'" "$1&#8217;")
-      (str/replace ,,, #"'" "&#8216;")))
+  (multi-replace s
+                 ; Find dumb double quotes coming directly after letters or punctuation,
+                 ; and replace them with right double quotes.
+                 [[#"([a-zA-Z0-9.,?!;:\"\'])\"" "$1&#8221;"]
+                  ; Find any remaining dumb double quotes and replace them with
+                  ; left double quotes.
+                  [#"\"" "&#8220;"]
+                  ; # Follow the same process with dumb/smart single quotes
+                  [#"([a-zA-Z0-9.,?!;:\"\'])'" "$1&#8217;"]
+                  [#"'" "&#8216;"]]))
 
-(dumb-quotes->smart-html-quotes "This is \"not\" fun")
+(comment
+  (dumb-quotes->smart-html-quotes "This is \"super\" 'duper' fun")
+  ; => "This is &#8220;super&#8221; &#8216;duper&#8217; fun"
+  :pass)
 
 ; TODO Apply curly-quotes->dumb-quotes, then dumb-quotes->smart-html-quotes, then smart-html-quotes->smart-latex-quotes
-; TODO write a multi-replace function and simplify the multiple calls to str/replace with a single call of multi-replace.
