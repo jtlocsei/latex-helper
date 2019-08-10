@@ -19,7 +19,24 @@
 
 (defn escape-string
   "Escape special characters in a string so that it's safe to use inside a LaTeX document.
-  NOT idempotent. Assumes that there are no escaped chars in the string yet. "
+  The function is NOT idempotent, so don't apply it more than once to the same string.
+
+  Examples:
+    (escape-string \"$\")
+    ; => \"{\\\\dollarchar}\"
+    ; Success!
+
+    (escape-string (escape-string \"$\"))
+    ; => \"{\\\\leftbracechar}{\\\\backslashchar}{\\\\rightbracechar}\"
+    ; Oops! Not idempotent.
+
+
+    (escape-string \"#$%&~_^\\\\{}\")
+    ; => \"{\\\\hashchar}{\\\\dollarchar}{\\\\percentchar}{\\\\ampersandchar}{\\\\tildechar}{\\\\underscorechar}{\\\\circumflexchar}{\\\\backslashchar}{\\\\leftbracechar}{\\\\rightbracechar}\"
+
+    (escape-string nil)
+    ; => \"\"
+  "
   [s]
   (->> s
        (map char-escapes ,,,)
@@ -29,12 +46,24 @@
   (println (escape-string "#$%&~_^\\{}"))
   ; {\hashchar}{\dollarchar}{\percentchar}{\ampersandchar}{\tildechar}{\underscorechar}{\circumflexchar}{\backslashchar}{\leftbracechar}{\rightbracechar}
 
+  (escape-string "#$%&~_^\\{}")
+  ; =>
+  ;"{\\hashchar}{\\dollarchar}{\\percentchar}{\\ampersandchar}{\\tildechar}{\\underscorechar}{\\circumflexchar}{\\backslashchar}{\\leftbracechar}{\\rightbracechar}"
+
   (escape-string nil)
   ; => ""
+
+  (escape-string "$")
+  ; => "{\\dollarchar}"
+  ; Success!
+
+  (escape-string (escape-string "$"))
+  ; => "{\\leftbracechar}{\\backslashchar}{\\rightbracechar}"
+  ; Oops! Not idempotent.
   :pass)
 
 
-(defn ^:private multi-replace
+(defn- multi-replace
   "Given a seq of [match replacement] pairs applies all replacements in order
   to the given string"
   [s match-replacement-pairs]
@@ -46,7 +75,8 @@
   (multi-replace "foo bar baz zod" [["bar" "BAR"]
                                     ["baz" "BAZ"]]))
 
-(defn ^:private curly-quotes->dumb-quotes
+
+(defn- curly-quotes->dumb-quotes
   "Take curly quotes like ‘ ’  “ ” and replace them with their
   straight quotes equivalents"
   [s]
@@ -59,14 +89,15 @@
   (println (curly-quotes->dumb-quotes "a ‘big’ “bright” day"))) ; a 'big' "bright" day
 
 
-(defn ^:private dumb-quotes->smart-html-quotes
+(defn- dumb-quotes->smart-html-quotes
   "Convert dumb quotes in a string to smart html quotes.
   Based on https://gist.github.com/davidtheclark/5521432"
   [s]
   (multi-replace s
-                 ; Find dumb double quotes coming directly after letters or punctuation,
-                 ; and replace them with right double quotes.
-                 [[#"([a-zA-Z0-9.,?!;:\"\'])\"" "$1&#8221;"]
+                 [
+                  ; Find dumb double quotes coming directly after letters or punctuation,
+                  ; and replace them with right double quotes.
+                  [#"([a-zA-Z0-9.,?!;:\"\'])\"" "$1&#8221;"]
                   ; Find any remaining dumb double quotes and replace them with
                   ; left double quotes.
                   [#"\"" "&#8220;"]
@@ -79,4 +110,42 @@
   ; => "This is &#8220;super&#8221; &#8216;duper&#8217; fun"
   :pass)
 
-; TODO Apply curly-quotes->dumb-quotes, then dumb-quotes->smart-html-quotes, then smart-html-quotes->smart-latex-quotes
+
+(defn- smart-html-quotes->smart-latex-quotes
+  "Convert a string that has smart html quotes to a string that has
+  smart latex quotes"
+  [s]
+  (multi-replace s
+                 [
+                  ["&#8221;"   "''"]   ; closing double quote
+                  ["&#8220;"   "``"]   ; opening double quote
+                  ["&#8217;"   "'"]    ; closing single quote
+                  ["&#8216;"   "`"]])) ; opening single quote
+
+
+(defn smart-quotes
+  "Given a string with dumb quotes or curly quotes, replace them with latex smart quotes
+
+  Examples:
+    (smart-quotes \"They say “It's ‘forever’ a bug’s life” don’t they?\")
+    ; => \"They say ``It's `forever' bug's life'' don't they?\"
+
+    (smart-quotes \"They say \\\"It's 'forever' a bug's life\\\" don't they?\")
+    ; => \"They say ``It's `forever' bug's life'' don't they?\""
+  [s]
+  (-> s
+      curly-quotes->dumb-quotes
+      dumb-quotes->smart-html-quotes
+      smart-html-quotes->smart-latex-quotes))
+
+(comment
+  ; Check that it works on input with curly quotes:
+  (smart-quotes "They say “It's ‘forever’ a bug’s life” don’t they?")
+  ; => "They say ``It's `forever' bug's life'' don't they?"
+
+  ; Check that it works on input with dumb quotes:
+  (smart-quotes "They say \"It's 'forever' a bug's life\" don't they?")
+  ; => "They say ``It's `forever' bug's life'' don't they?"
+  :pass)
+
+
