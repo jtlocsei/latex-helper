@@ -1,4 +1,4 @@
-(defproject latex-helper "0.1.1"
+(defproject latex-helper "0.1.2"
   :description "A tiny clojure library with some helpers for writing LaTeX, e.g. escaping special characters, and turning dumb quotes to smart quotes."
   :url "https://github.com/jtlocsei/latex-helper"
   :license {:name "EPL-2.0 OR GPL-2.0-or-later WITH Classpath-exception-2.0"

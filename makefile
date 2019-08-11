@@ -1,5 +1,5 @@
 # Any tasks that don't create a file should be listed in .PHONY
-.PHONY: docs help
+.PHONY: docs help clojars
 
 # help should be the first target so that is the default
 help:  ## List commands and what they do
@@ -11,5 +11,5 @@ docs: ## Use codox to build documentation into the docs folder. Overwrites all d
 	mkdir docs
 	mv target/doc/* docs
 
-clojars: ## Push the project to clojars
+clojars: docs ## Push the project to clojars
 	lein deploy clojars

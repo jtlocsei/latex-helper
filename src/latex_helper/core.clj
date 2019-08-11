@@ -39,28 +39,25 @@
     ; Success!
 
     (escape-string (escape-string \"$\"))
-    ; => \"{\\\\leftbracechar}{\\\\backslashchar}{\\\\rightbracechar}\"
+    ; => \"{\\\\leftbracechar}{\\\\backslashchar}dollarchar{\\\\rightbracechar}\"
     ; Oops! Not idempotent.
 
 
-    (escape-string \"#$%&~_^\\\\{}\")
-    ; => \"{\\\\hashchar}{\\\\dollarchar}{\\\\percentchar}{\\\\ampersandchar}{\\\\tildechar}{\\\\underscorechar}{\\\\circumflexchar}{\\\\backslashchar}{\\\\leftbracechar}{\\\\rightbracechar}\"
+    (escape-string \"foo #$%&~_^\\\\{} bar\")
+    ; => \"foo {\\\\hashchar}{\\\\dollarchar}{\\\\percentchar}{\\\\ampersandchar}{\\\\tildechar}{\\\\underscorechar}{\\\\circumflexchar}{\\\\backslashchar}{\\\\leftbracechar}{\\\\rightbracechar} bar\"
 
     (escape-string nil)
     ; => \"\"
   "
   [s]
   (->> s
-       (map char-escapes ,,,)
+       (map escape-char ,,,)
        (apply str ,,,)))
 
 (comment
-  (println (escape-string "#$%&~_^\\{}"))
-  ; {\hashchar}{\dollarchar}{\percentchar}{\ampersandchar}{\tildechar}{\underscorechar}{\circumflexchar}{\backslashchar}{\leftbracechar}{\rightbracechar}
-
-  (escape-string "#$%&~_^\\{}")
+  (escape-string "foo #$%&~_^\\{} bar")
   ; =>
-  ;"{\\hashchar}{\\dollarchar}{\\percentchar}{\\ampersandchar}{\\tildechar}{\\underscorechar}{\\circumflexchar}{\\backslashchar}{\\leftbracechar}{\\rightbracechar}"
+  ; "foo {\\hashchar}{\\dollarchar}{\\percentchar}{\\ampersandchar}{\\tildechar}{\\underscorechar}{\\circumflexchar}{\\backslashchar}{\\leftbracechar}{\\rightbracechar} bar"
 
   (escape-string nil)
   ; => ""
