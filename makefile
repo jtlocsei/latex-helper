@@ -2,8 +2,8 @@
 .PHONY: codox
 
 codox:
-	rm -rf doc/codox
+	rm -rf doc
 	lein codox
-	mkdir -p doc/codox
-	mv target/doc/* doc/codox
+	mkdir doc
+	mv target/doc/* doc
 	rm -rf target/doc
