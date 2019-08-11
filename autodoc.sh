@@ -25,7 +25,7 @@ AUTODOC_CMD=${AUTODOC_CMD:-"lein codox"}
 #AUTODOC_CMD=${AUTODOC_CMD:-"boot codox -s src -n my-project -o gh-pages target"}
 
 # Working tree directory. The output of $AUTODOC_CMD must end up in this directory.
-AUTODOC_DIR=${AUTODOC_DIR:-"gh-pages"}
+AUTODOC_DIR=${AUTODOC_DIR:-"target/doc"}
 
 # Working tree subdirectory. This is for situations where the caller
 # wishes to preserve multiple versions of the documentation. When
