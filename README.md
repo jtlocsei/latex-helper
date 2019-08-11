@@ -1,6 +1,6 @@
 # latex-helper
 
-A Clojure library designed to help out with various tasks associated with writing latex documents.
+A tiny clojure library with some helpers for writing LaTeX, e.g. escaping special characters, and turning dumb quotes to smart quotes.
 
 ## Installation & Usage
 
