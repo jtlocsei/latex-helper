@@ -124,7 +124,7 @@
 
 
 (defn smart-quotes
-  "Given a string with dumb quotes or curly quotes, replace them with latex smart quotes
+  "Given a string with dumb quotes or curly quotes, replace them with latex smart quotes.
 
   Examples:
     (smart-quotes \"They say “It's ‘forever’ a bug’s life” don’t they?\")
