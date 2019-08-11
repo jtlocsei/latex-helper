@@ -17,6 +17,18 @@
 (comment (get char-escapes \#))
 
 
+(defn- escape-char
+  "Escape a character so that it's safe to use in a LaTeX document"
+  [c]
+  (or (char-escapes c) c))
+
+(comment
+  (escape-char \a) ; => \a
+  (escape-char \$) ; => "{\\dollarchar}"
+  :pass)
+
+
+
 (defn escape-string
   "Escape special characters in a string so that it's safe to use inside a LaTeX document.
   The function is NOT idempotent, so don't apply it more than once to the same string.

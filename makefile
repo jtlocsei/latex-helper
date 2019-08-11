@@ -10,3 +10,6 @@ docs: ## Use codox to build documentation into the docs folder. Overwrites all d
 	rm -rf docs
 	mkdir docs
 	mv target/doc/* docs
+
+clojars: ## Push the project to clojars
+	lein deploy clojars
